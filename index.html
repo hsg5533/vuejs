@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue.js 3 블로그 게시판</title>
+    <!-- Vue.js CDN -->
+    <script src="./vue.js"></script>
+    <style>
+      /* 스타일 추가 */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      #app {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      header {
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      h2 {
+        margin-bottom: 20px;
+        font-size: 20px;
+        color: #555;
+      }
+      form input,
+      form textarea {
+        width: calc(100% - 22px);
+        margin-bottom: 10px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        background: #f9f9f9;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+      }
+      .edit-btn {
+        background-color: #3f51b5;
+        color: #fff;
+        margin-right: 10px;
+      }
+      .edit-btn:hover {
+        background-color: #334091;
+      }
+      .delete-btn {
+        background-color: #e91e63;
+        color: #fff;
+      }
+      .delete-btn:hover {
+        background-color: #b3164a;
+      }
+      .no-posts-message {
+        font-size: 18px;
+        text-align: center;
+        color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- 헤더 바 -->
+      <header>
+        <h1>블로그 게시판</h1>
+      </header>
+
+      <!-- 게시물 목록 -->
+      <div>
+        <h2>게시물 목록</h2>
+        <ul v-if="posts.length > 0">
+          <li v-for="(post, index) in posts" :key="index">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <button @click="editPost(index)" class="edit-btn">수정</button>
+            <button @click="deletePost(index)" class="delete-btn">삭제</button>
+          </li>
+        </ul>
+        <p v-else class="no-posts-message">게시물이 없습니다.</p>
+      </div>
+
+      <!-- 게시물 작성 폼 -->
+      <div>
+        <h2>{{ editingIndex === null ? '게시물 작성' : '게시물 수정' }}</h2>
+        <form v-if="editingIndex !== null" @submit.prevent="updatePost">
+          <input type="text" placeholder="제목" v-model="newPost.title" />
+          <textarea placeholder="내용" v-model="newPost.content"></textarea>
+          <button type="submit" class="edit-btn">
+            {{ editingIndex !== null ? '수정' : '게시' }}
+          </button>
+          <button type="button" @click="clearForm" class="delete-btn">
+            취소
+          </button>
+        </form>
+        <form v-else @submit.prevent="addPost">
+          <input type="text" placeholder="제목" v-model="newPost.title" />
+          <textarea placeholder="내용" v-model="newPost.content"></textarea>
+          <button type="submit" class="edit-btn">
+            {{ editingIndex !== null ? '수정' : '게시' }}
+          </button>
+        </form>
+      </div>
+    </div>
+    <script>
+      const { createApp, ref } = Vue;
+      const app = createApp({
+        setup() {
+          const posts = ref([
+            { title: "첫 번째 게시물", content: "첫 번째 게시물 내용" },
+            { title: "두 번째 게시물", content: "두 번째 게시물 내용" },
+          ]);
+          const newPost = ref({
+            title: "",
+            content: "",
+          });
+          const editingIndex = ref(null);
+
+          const addPost = () => {
+            if (newPost.value.title && newPost.value.content) {
+              posts.value.push({ ...newPost.value });
+              clearForm();
+            } else {
+              alert("제목과 내용을 입력하세요.");
+            }
+          };
+
+          const editPost = (index) => {
+            editingIndex.value = index;
+            newPost.value.title = posts.value[index].title;
+            newPost.value.content = posts.value[index].content;
+          };
+
+          const updatePost = () => {
+            if (newPost.value.title && newPost.value.content) {
+              const index = editingIndex.value;
+              posts.value[index].title = newPost.value.title;
+              posts.value[index].content = newPost.value.content;
+              clearForm();
+            } else {
+              alert("제목과 내용을 입력하세요.");
+            }
+          };
+
+          const deletePost = (index) => {
+            posts.value.splice(index, 1);
+          };
+
+          const clearForm = () => {
+            newPost.value.title = "";
+            newPost.value.content = "";
+            editingIndex.value = null;
+          };
+
+          return {
+            posts,
+            newPost,
+            editingIndex,
+            addPost,
+            editPost,
+            updatePost,
+            deletePost,
+            clearForm,
+          };
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>
